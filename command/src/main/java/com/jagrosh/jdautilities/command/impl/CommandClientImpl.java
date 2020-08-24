@@ -495,23 +495,8 @@ public class CommandClientImpl implements CommandClient, EventListener
 
         GuildSettingsProvider settings = event.isFromType(ChannelType.TEXT)? provideSettings(event.getGuild()) : null;
 
-        // Check for prefix or alternate prefix (@mention cases)
-        if(prefix.equals(DEFAULT_PREFIX) || (altprefix != null && altprefix.equals(DEFAULT_PREFIX)))
-        {
-            if(rawContent.startsWith("<@"+event.getJDA().getSelfUser().getId()+">") ||
-                    rawContent.startsWith("<@!"+event.getJDA().getSelfUser().getId()+">"))
-            {
-                parts = splitOnPrefixLength(rawContent, rawContent.indexOf(">") + 1);
-            }
-        }
-        // Check for prefix
-        if(parts == null && rawContent.toLowerCase().startsWith(prefix.toLowerCase()))
-            parts = splitOnPrefixLength(rawContent, prefix.length());
-        // Check for alternate prefix
-        if(parts == null && altprefix != null && rawContent.toLowerCase().startsWith(altprefix.toLowerCase()))
-            parts = splitOnPrefixLength(rawContent, altprefix.length());
         // Check for guild specific prefixes
-        if(parts == null && settings != null)
+        if(settings != null)
         {
             Collection<String> prefixes = settings.getPrefixes();
             if(prefixes != null)
@@ -522,6 +507,20 @@ public class CommandClientImpl implements CommandClient, EventListener
                         parts = splitOnPrefixLength(rawContent, prefix.length());
                 }
             }
+        } else {
+            // Check for prefix or alternate prefix (@mention cases)
+            if (prefix.equals(DEFAULT_PREFIX) || (altprefix != null && altprefix.equals(DEFAULT_PREFIX))) {
+                if (rawContent.startsWith("<@" + event.getJDA().getSelfUser().getId() + ">") ||
+                    rawContent.startsWith("<@!" + event.getJDA().getSelfUser().getId() + ">")) {
+                    parts = splitOnPrefixLength(rawContent, rawContent.indexOf(">") + 1);
+                }
+            }
+            // Check for prefix
+            if (parts == null && rawContent.toLowerCase().startsWith(prefix.toLowerCase()))
+                parts = splitOnPrefixLength(rawContent, prefix.length());
+            // Check for alternate prefix
+            if (parts == null && altprefix != null && rawContent.toLowerCase().startsWith(altprefix.toLowerCase()))
+                parts = splitOnPrefixLength(rawContent, altprefix.length());
         }
 
         if(parts!=null) //starts with valid prefix
